@@ -337,7 +337,9 @@ while run:
         draw()
 
         if rules:
-            print("I'm the creator of this game and these are the rules.")
+            print("The goal of this game is to defeat the dragon who lives in a cave somewhere in the 
+                    mountains.  You may find some hints in the nearby village.  Make sure to gather
+                    your strength (and some life-saving potions!) before the final battle...")
             rules = False
             input("> ")
         else:
