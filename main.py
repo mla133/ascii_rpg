@@ -19,14 +19,18 @@ def save():
 
 def clear():
     os.system("clear")
+def draw():
+    print("Xx---------------------------xX")
 
 while run:
     while menu:
         clear()
+        draw()
         print("1.  NEW GAME")
         print("2.  LOAD GAME")
         print("3.  RULES")
         print("4.  QUIT GAME")
+        draw()
 
         if rules:
             print("I'm the creator of this game and these are the rules.")
@@ -58,6 +62,11 @@ while run:
     
     while play:
         save()  #autosave
+
+        clear()
+        draw()
+        print("0 - SAVE AND QUIT")
+        draw()
 
         dest = input("# ")
 
