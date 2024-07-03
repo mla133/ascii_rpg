@@ -1,16 +1,19 @@
 import os
+import random
 
 run = True
 menu = True
 play = False
 rules = False
 key = False
+fight = False
+standing = True
 
 HP = 50
 HPMAX = HP
 ATK = 3
-pot = 1
-elix = 0
+pot = 10
+elix = 20
 gold = 0
 x = 0
 y = 0
@@ -62,7 +65,26 @@ biom = {
             "e": True}
         }
         
+e_list = ["Goblin", "Orc", "Slime"]
 
+mobs = {
+        "Goblin": {
+            "hp":   15,
+            "at":   3,
+            "go":   8},
+        "Orc":  {
+            "hp":    35,
+            "at":   5,
+            "go":   18}, 
+        "Slime":    {
+            "hp":   30,
+            "at":   2,
+            "go":   12},
+        "Dragon":   {
+            "hp":   100,
+            "at":   8,
+            "go":   100}
+        }
 
 def save():
     list = [ name, str(HP), str(ATK), str(pot), str(elix), str(gold), str(x), str(y), str(key) ]
@@ -104,6 +126,97 @@ def clear():
 def draw():
     print("Xx---------------------------xX")
 
+def battle():
+    global fight, play, run, HP, ATK, pot, elix, gold
+    enemy = random.choice(e_list)
+    hp = mobs[enemy]["hp"]
+    hpmax = hp
+    atk = mobs[enemy]["at"]
+    g = mobs[enemy]["go"]
+
+    while fight:
+        clear()
+        draw()
+        print("Defeat the " + enemy + "!")
+        draw()
+        print(enemy + "'s HP: " + str(hp) + "/" + str(hpmax))
+        print(name + "'s HP: " + str(HP) + "/" + str(HPMAX))
+        print("POTIONS: " + str(pot))
+        print("ELIXIRS: " + str(elix))
+        draw()
+        print("1 - ATTACK")
+        if pot > 0:
+            print("2 - USE POTION (30HP)")
+        if elix > 0:
+            print("3 - USE ELIXIR (50HP)")
+
+        choice = input("# ")
+
+        if choice == "1":
+            hp -= ATK
+            print(name + " dealt " + str(ATK) + " damage to the " + enemy + ".")
+
+            if hp > 0:
+                HP -= atk
+                print(enemy + " dealt " + str(ATK) + " damage to " + name + ".")
+
+            input("> ")
+
+        if choice == "2":
+            if pot > 0:
+                pot -= 1
+                heal(30)
+                HP -= atk
+                print(enemy + " dealt " + str(ATK) + " damage to " + name + ".")
+                input("< ")
+            else:
+                print("No potions!")
+
+        if choice == "3":
+            if elix > 0:
+                elix -= 1
+                heal(50)
+                HP -= atk
+                print(enemy + " dealt " + str(ATK) + " damage to " + name + ".")
+                input("< ")
+            else:
+                print("No elixirs!")
+
+        input("> ")
+
+        if HP <= 0:
+            print(enemy + " defeated " + name + "...")
+            draw()
+            fight = False
+            play = False
+            run = False
+            print("GAME OVER")
+            input("> ")
+
+        if hp <= 0:
+            print(name + " defeated " + enemy + "!")
+            draw()
+            fight = False
+            gold += g
+            print("You've found " + str(g) + " gold!")
+
+            if random.randint(0, 100) < 30:
+                pot += 1
+                print("You've found a potion!")
+            if random.randint(0, 100) < 10:
+                elix += 1
+                print("You've found an elixir!")
+
+            input("> ")
+
+def heal(amount):
+    global HP
+    if HP + amount < HPMAX:
+        HP += amount
+    else:
+        HP = HPMAX
+    print(name + "'s HP refilled to " + str(HP) + "!")
+
 while run:
     while menu:
         clear()
@@ -141,43 +254,82 @@ while run:
     while play:
         save()  #autosave
         clear()
-        draw()
-        print("LOCATION: " + biom[map[y][x]]["t"])
-        draw()
-        print("NAME: " + name)
-        print("HP: " + str(HP) + "/" + str(HPMAX))
-        print("ATK: " + str(ATK))
-        print("POTIONS: " + str(pot))
-        print("ELIXIRS: " + str(elix))
-        print("GOLD: " + str(gold))
-        print("COORDS: ", x, y)
-        draw()
-        print("0 - SAVE AND QUIT")
-        if y > 0:
-            print("1 - NORTH")
-        if x < x_len:
-            print("2 - EAST")
-        if y < y_len:
-            print("3 - SOUTH")
-        if x > 0:
-            print("4 - WEST")
-        draw()
 
-        dest = input("# ")
-
-        if dest == "0":
-            play = False
-            menu = True
-            save()
-        elif dest == "1":
+        if not standing:
+            if biom[map[y][x]]["e"]:
+                if random.randint(0, 100) <= 30:
+                    fight = True
+                    battle()
+        if play:
+            draw()
+            print("LOCATION: " + biom[map[y][x]]["t"])
+            draw()
+            print("NAME: " + name)
+            print("HP: " + str(HP) + "/" + str(HPMAX))
+            print("ATK: " + str(ATK))
+            print("POTIONS: " + str(pot))
+            print("ELIXIRS: " + str(elix))
+            print("GOLD: " + str(gold))
+            print("COORDS: ", x, y)
+            draw()
+            print("0 - SAVE AND QUIT")
             if y > 0:
-                y -= 1
-        elif dest == "2":
+                print("1 - NORTH")
             if x < x_len:
-                x += 1
-        elif dest == "3":
+                print("2 - EAST")
             if y < y_len:
-                y += 1
-        elif dest == "4":
+                print("3 - SOUTH")
             if x > 0:
-                x -= 1
+                print("4 - WEST")
+            if pot > 0:
+                print("5 - USE POTION (30HP)")
+            if elix > 0:
+                print("6 - USE ELIXIR (50HP)")
+            draw()
+
+            dest = input("# ")
+
+            if dest == "0":
+                play = False
+                menu = True
+                save()
+            elif dest == "1":
+                if y > 0:
+                    y -= 1
+                    standing = False
+            elif dest == "2":
+                if x < x_len:
+                    x += 1
+                    standing = False
+            elif dest == "3":
+                if y < y_len:
+                    y += 1
+                    standing = False
+            elif dest == "4":
+                if x > 0:
+                    x -= 1
+                    standing = False
+            elif dest == "5":
+                if pot > 0:
+                    pot -= 1
+                    heal(30)
+                else:
+                    print("No potions!")
+                input("> ")
+                standing = True
+            elif dest == "6":
+                if elix > 0:
+                    elix -= 1
+                    heal(50)
+                else:
+                    print("No elixirs!")
+                standing = True
+                input("> ")
+
+            else:
+                standing = True
+
+
+
+
+
